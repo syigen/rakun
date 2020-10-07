@@ -20,6 +20,7 @@ type Config struct {
 	Version      string
 	BuildVersion int
 	Agents       AgentList `yaml:",flow"`
+	WorkDir      string
 }
 
 func (config *Config) Init() {
@@ -27,7 +28,9 @@ func (config *Config) Init() {
 	if err != nil {
 		log.Print(err)
 	}
-	fmt.Println("Work Dir ", workDir)
+	log.Println("Work Dir ", workDir)
+	config.WorkDir = workDir //Set Work Dir
+
 	content, err := ioutil.ReadFile(fmt.Sprintf("%s/RakunConfig", workDir))
 	if err != nil {
 		log.Fatal(err)
@@ -37,8 +40,8 @@ func (config *Config) Init() {
 	if err != nil {
 		log.Println("error: %v", err)
 	}
-	fmt.Println(fmt.Sprintf("Name: %s\nVersion:%s\nBuild Version:%d\nAgents", config.Name, config.Version, config.BuildVersion))
+	log.Println(fmt.Sprintf("Name: %s\nVersion:%s\nBuild Version:%d\nAgents", config.Name, config.Version, config.BuildVersion))
 	for agentKey, agent := range config.Agents {
-		fmt.Println(fmt.Sprintf("\tid: %s\n\t\tname: %s\n\t\tcode: %s", agentKey, agent.Name, agent.Code))
+		log.Println(fmt.Sprintf("\tid: %s\n\t\tname: %s\n\t\tcode: %s", agentKey, agent.Name, agent.Code))
 	}
 }

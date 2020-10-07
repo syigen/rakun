@@ -35,6 +35,8 @@ to quickly create a Cobra application.`,
 		fmt.Println("serve called")
 		conf := prepare.Config{}
 		conf.Init()
+		env := prepare.Environment{Config: conf}
+		env.Build()
 	},
 }
 

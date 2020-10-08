@@ -14,11 +14,11 @@ async def execute_agent():
 
 
 @click.command()
-@click.option('--stack-name', default=1, help='Agent Stack Name')
-@click.option('--comm-url', default=1, help='Rakun Stack Communication URL')
-@click.option('--id', default=1, help='Agent ID')
-@click.option('--name', default=1, help='Agent Name')
-@click.option('--source', default=1, help='Agent Source')
+@click.option('--stack-name', help='Agent Stack Name')
+@click.option('--comm-url', help='Rakun Stack Communication URL')
+@click.option('--id', help='Agent ID')
+@click.option('--name', help='Agent Name')
+@click.option('--source', help='Agent Source')
 @click.option("--init-params", multiple=True, default=[("name", "agent_init")], type=click.Tuple([str, str]))
 def run(stack_name, comm_url, id, name, source, init_params):
     print(f"Agent Stack Name {stack_name}")

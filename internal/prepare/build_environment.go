@@ -23,7 +23,7 @@ func (env *Environment) Build() {
 		destination := filepath.FromSlash(fmt.Sprintf("%s/%s", env.EnvPath, requiredFile))
 		log.Printf("Copying %s to %s\n", source, destination)
 
-		err := utils.CopyFiles(source, destination, 1024)
+		err := utils.Copy(source, destination)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -34,16 +34,10 @@ func (env *Environment) Build() {
 		destination := filepath.FromSlash(fmt.Sprintf("%s/%s", env.EnvPath, agent.Code))
 		log.Printf("Copying %s to %s\n", source, destination)
 
-		err := utils.CopyFiles(source, destination, 1024)
+		err := utils.Copy(source, destination)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
-
-	//err = copy(source, destination, BUFFERSIZE)
-	//if err != nil {
-	//	fmt.Printf("File copying failed: %q\n", err)
-	//}
-
 	// 3. Create runtimes
 }

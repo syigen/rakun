@@ -16,11 +16,12 @@ type Agent struct {
 type AgentList map[string]Agent
 
 type Config struct {
-	Name         string
-	Version      string
-	BuildVersion int
-	Agents       AgentList `yaml:",flow"`
-	WorkDir      string
+	Name          string
+	Version       string
+	BuildVersion  int
+	Agents        AgentList `yaml:",flow"`
+	WorkDir       string
+	RequiredFiles []string `yaml:",flow"`
 }
 
 func (config *Config) Init() {
@@ -40,8 +41,47 @@ func (config *Config) Init() {
 	if err != nil {
 		log.Println("error: %v", err)
 	}
-	log.Println(fmt.Sprintf("Name: %s\nVersion:%s\nBuild Version:%d\nAgents", config.Name, config.Version, config.BuildVersion))
+	log.Println(fmt.Sprintf("Name: %s", config.Name))
+	log.Println(fmt.Sprintf("Version: %s", config.Version))
+	log.Println(fmt.Sprintf("Build Version: %d", config.BuildVersion))
+	log.Println("Agents")
 	for agentKey, agent := range config.Agents {
-		log.Println(fmt.Sprintf("\tid: %s\n\t\tname: %s\n\t\tcode: %s", agentKey, agent.Name, agent.Code))
+		log.Println(fmt.Sprintf("id: %s", agentKey))
+		log.Println(fmt.Sprintf("\tname: %s", agent.Name))
+		log.Println(fmt.Sprintf("\tcode: %s", agent.Code))
 	}
+	// Required Files
+	log.Println("Required Files")
+	for _, file := range config.RequiredFiles {
+		log.Println(file)
+	}
+
+}
+
+func (_ *Config) GenConfigSample() {
+	sam := Config{
+		Name:         "Environment Name",
+		Version:      "",
+		BuildVersion: 0,
+		Agents: map[string]Agent{
+			"agent1": {
+				Name: "A",
+				Code: "A.py",
+			},
+			"agent2": {
+				Name: "B",
+				Code: "B.py",
+			},
+		},
+		WorkDir: "environment working dir",
+		RequiredFiles: []string{
+			"a.txt",
+			"main.py",
+		},
+	}
+	d, err := yaml.Marshal(&sam)
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+	log.Printf("--- m dump:\n%s\n\n", string(d))
 }

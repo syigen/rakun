@@ -34,6 +34,7 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("serve called")
 		conf := prepare.Config{}
+		conf.GenConfigSample()
 		conf.Init()
 		env := prepare.Environment{Config: conf}
 		env.Build()

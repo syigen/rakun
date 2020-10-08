@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"github.com/markbates/pkger"
 	"io"
 	"io/ioutil"
 	"os"
@@ -64,9 +65,6 @@ func File(src, dst string) error {
 	var dstfd *os.File
 	var srcinfo os.FileInfo
 
-	srcDir, _ := filepath.Split(src)
-	CreateDir(srcDir, false)
-
 	dstDir, _ := filepath.Split(dst)
 	CreateDir(dstDir, false)
 
@@ -87,4 +85,33 @@ func File(src, dst string) error {
 		return err
 	}
 	return os.Chmod(dst, srcinfo.Mode())
+}
+
+func PkgFile(src, dst string) error {
+	var err error
+	var dstfd *os.File
+
+	srcfd, err := pkger.Open(src)
+	if err != nil {
+		return err
+	}
+	defer srcfd.Close()
+
+	info, err := srcfd.Stat()
+	if err != nil {
+		return err
+	}
+
+	dstDir, _ := filepath.Split(dst)
+	CreateDir(dstDir, false)
+
+	if dstfd, err = os.Create(dst); err != nil {
+		return err
+	}
+	defer dstfd.Close()
+
+	if _, err = io.Copy(dstfd, srcfd); err != nil {
+		return err
+	}
+	return os.Chmod(dst, info.Mode())
 }

@@ -1,7 +1,7 @@
-class AgentSampleOne:
+class AgentTwo:
     name = "Agent Sample"
 
-    def start(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         print(f"{self.name} Start")
         print(f"Args = {args}")
         print(f"Kwargs = {kwargs}")
@@ -11,7 +11,7 @@ class AgentSampleOne:
         print(f"Args = {args}")
         print(f"Kwargs = {kwargs}")
 
-    def execute(self, *args, **kwargs):
+    async def execute(self, *args, **kwargs):
         print(f"{self.name} Execute")
         print(f"Args = {args}")
         print(f"Kwargs = {kwargs}")

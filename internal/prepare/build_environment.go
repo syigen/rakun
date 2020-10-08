@@ -9,12 +9,7 @@ import (
 	"path/filepath"
 )
 
-type Environment struct {
-	Config  *Config
-	EnvPath string
-}
-
-func (env *Environment) Build() {
+func (env *Environment) BuildRunEnvironment() {
 	var err error
 	log.Println("\nStart Build Environment")
 	env.EnvPath = fmt.Sprintf("%s/_rakun_env", env.Config.WorkDir) // Set Env Path
@@ -33,7 +28,9 @@ func (env *Environment) Build() {
 		}
 	}
 	// 2. Copy Agent files to environment
-	for _, agent := range env.Config.Agents {
+	log.Println("Number of agents ", len(env.Config.Agents))
+	for name, agent := range env.Config.Agents {
+		log.Println("Agent Name", name)
 		source := filepath.FromSlash(fmt.Sprintf("%s/%s", env.Config.WorkDir, agent.Code))
 		destination := filepath.FromSlash(fmt.Sprintf("%s/%s", env.EnvPath, agent.Code))
 		log.Printf("Copying %s to %s\n", source, destination)

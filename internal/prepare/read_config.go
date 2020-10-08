@@ -8,23 +8,7 @@ import (
 	"os"
 )
 
-type Agent struct {
-	Name string
-	Code string
-}
-
-type AgentList map[string]Agent
-
-type Config struct {
-	Name          string
-	Version       string
-	BuildVersion  int
-	Agents        AgentList `yaml:",flow"`
-	WorkDir       string
-	RequiredFiles []string `yaml:",flow"`
-}
-
-func (config *Config) Init() {
+func (config *Config) InitRunConfig() {
 	workDir, err := os.Getwd()
 	if err != nil {
 		log.Print(err)

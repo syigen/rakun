@@ -1,0 +1,6 @@
+name: Environment Name
+version: 1.0.0
+buildversion: 1
+agents: {agent1: {name: Sample Agent One, code: agent/sample_agent_one.py}, agent2: {name: Sample Agent Two, code: agent/sample_agent_two.py}}
+workdir: K:\Research\multi_agent_platform\service\examples\example_one_app
+requiredfiles: [requirements.txt]

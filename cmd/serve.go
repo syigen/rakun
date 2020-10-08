@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/dewmal/rakun/internal/prepare"
+	"github.com/dewmal/rakun/internal/runtime"
 	"github.com/spf13/cobra"
 )
 
@@ -34,11 +35,18 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("serve called")
 
-		conf := prepare.Config{}
+		var conf prepare.Config
+		var env prepare.Environment
+		var run runtime.RunTime
+
+		conf = prepare.Config{}
+		env = prepare.Environment{Config: &conf}
+		run = runtime.RunTime{Environment: &env}
+
 		conf.GenConfigSample()
 		conf.Init()
-		env := prepare.Environment{Config: conf}
 		env.Build()
+		run.Start()
 	},
 }
 

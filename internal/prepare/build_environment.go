@@ -3,13 +3,14 @@ package prepare
 import (
 	"fmt"
 	"github.com/dewmal/rakun/internal/utils"
+	"github.com/dewmal/rakun/internal/utils/exe_support"
 	"log"
 	"os/exec"
 	"path/filepath"
 )
 
 type Environment struct {
-	Config  Config
+	Config  *Config
 	EnvPath string
 }
 
@@ -60,5 +61,10 @@ func (env *Environment) Build() {
 		return
 	}
 	log.Println(string(stdout))
+
+	exe_support.RunCommand(
+		fmt.Sprintf("%s/venv/Scripts/pip.exe", env.EnvPath),
+		"install", "-r",
+		fmt.Sprintf("%s/requirements.txt", env.EnvPath))
 
 }

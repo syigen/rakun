@@ -31,4 +31,4 @@ class AgentOne:
         while True:
             await self.publish("AgentTwo", "Hi Agent 2")
             await self.publish("AgentTwo", "Do you know me")
-            await asyncio.sleep(100)
+            await asyncio.sleep(2)

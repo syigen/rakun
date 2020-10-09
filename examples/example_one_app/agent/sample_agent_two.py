@@ -1,3 +1,6 @@
+import asyncio
+
+
 class AgentTwo:
     name = "Agent Sample"
 
@@ -25,3 +28,7 @@ class AgentTwo:
         print(f"{self.name} Execute")
         print(f"Args = {args}")
         print(f"Kwargs = {kwargs}")
+        while True:
+            await self.publish("AgentOne", "Hi Agent 1")
+            await self.publish("AgentOne", "Do you know me")
+            await asyncio.sleep(100)

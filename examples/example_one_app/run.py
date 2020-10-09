@@ -101,7 +101,10 @@ def run(stack_name, comm_url, id, name, source, init_params):
 
         await agent.start_agent()
 
-        tsk = asyncio.ensure_future(pub_sub.subscribe(agent.accept_message))
+        # tsk = asyncio.ensure_future(pub_sub.subscribe(agent.accept_message))
+        # tsk_execute = asyncio.ensure_future(pub_sub.subscribe(agent.accept_message))
+        tasks = [pub_sub.subscribe(agent.accept_message), agent.execute_agent()]
+        tsk = asyncio.wait(tasks, return_when=asyncio.ALL_COMPLETED)
         await tsk
         await agent.stop_agent()
         sub.close()

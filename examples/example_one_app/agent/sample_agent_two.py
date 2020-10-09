@@ -6,7 +6,17 @@ class AgentTwo:
         print(f"Args = {args}")
         print(f"Kwargs = {kwargs}")
 
-    def stop(self, *args, **kwargs):
+    async def start(self):
+        from agent.sample_agent_one import AgentOne
+        await self.publish(AgentOne, "Hi Agent 1")
+        await self.publish(AgentOne, "Im Agent 2")
+
+    async def accept_message(self, agent, message):
+        print("Inbox")
+        print(agent)
+        print(message)
+
+    async def stop(self, *args, **kwargs):
         print(f"{self.name} Stop")
         print(f"Args = {args}")
         print(f"Kwargs = {kwargs}")

@@ -1,3 +1,3 @@
 click
 aioredis
-python-redis-log
+rlog

@@ -9,10 +9,10 @@ from importlib.machinery import SourceFileLoader
 
 from aioredis import Redis
 import logging
+from rlog import RedisHandler
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 log = logging.getLogger("RAKUN-MAS")
-log.info("Initiate")
 
 
 class AgentWrapper:
@@ -74,6 +74,10 @@ class PubSub:
 @click.option('--source', help='Agent Source')
 @click.option("--init-params", multiple=True, default=[("name", "agent_init")], type=click.Tuple([str, str]))
 def run(stack_name, comm_url, id, name, source, init_params):
+    log.addHandler(
+        RedisHandler(channel=f'{stack_name}_logger', host=comm_url.split(":")[0], port=int(comm_url.split(":")[1])))
+    log.info("Initiate")
+
     log.info(f"Agent Stack Name {stack_name}")
     log.info(f"Communication URL {comm_url}")
     log.info(f"Agent ID {id}")

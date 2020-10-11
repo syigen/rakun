@@ -36,5 +36,5 @@ class AgentOne:
         log.info(f"Kwargs = {kwargs}")
 
         while True:
-            await self.publish("AgentTwo", "Hellooo AGENT 2222")
+            await self.publish("AgentTwo", "Hello AGENT 2")
             await asyncio.sleep(2)

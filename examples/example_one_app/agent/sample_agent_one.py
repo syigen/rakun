@@ -19,9 +19,11 @@ class AgentOne:
         await self.publish("AgentTwo", "Im Agent 1")
 
     async def accept_message(self, agent, message):
-        log.info("Inbox")
+        print("--------Agent 1 receiving messages-----------")
+        log.info("Inbox of agent 1")
         log.info(agent)
         log.info(message)
+        print("--------Agent 1 receiving messages-----------")
 
     async def stop(self, *args, **kwargs):
         log.info(f"{self.name} Stop")

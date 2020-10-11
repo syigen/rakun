@@ -1,5 +1,7 @@
 package prepare
 
+import "github.com/go-redis/redis/v8"
+
 type Agent struct {
 	Name string
 	Code string
@@ -17,6 +19,17 @@ type Config struct {
 }
 
 type Environment struct {
-	Config  *Config
-	EnvPath string
+	Config           *Config
+	EnvPath          string
+	CommServerClient *redis.Client
+}
+
+func (env *Environment) SetupCommServerClient() {
+	commUrl := env.Config.CommunicationUrl
+
+	env.CommServerClient = redis.NewClient(&redis.Options{
+		Addr:     commUrl,
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
 }

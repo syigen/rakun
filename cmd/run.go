@@ -44,7 +44,9 @@ to quickly create a Cobra application.`,
 		run = runtime.RunTime{Environment: &env}
 
 		conf.InitRunConfig()
+		env.SetupCommServerClient()
 		run.Start()
+		run.Watch()
 	},
 }
 

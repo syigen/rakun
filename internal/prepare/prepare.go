@@ -7,12 +7,13 @@ type Agent struct {
 
 type AgentList map[string]Agent
 type Config struct {
-	Name          string
-	Version       string
-	BuildVersion  int
-	Agents        AgentList `yaml:",flow"`
-	WorkDir       string
-	RequiredFiles []string `yaml:",flow"`
+	Name             string
+	Version          string
+	BuildVersion     int
+	Agents           AgentList `yaml:",flow"`
+	WorkDir          string
+	CommunicationUrl string
+	RequiredFiles    []string `yaml:",flow"`
 }
 
 type Environment struct {

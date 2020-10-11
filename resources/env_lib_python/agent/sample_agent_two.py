@@ -18,9 +18,11 @@ class AgentTwo:
         await self.publish("AgentOne", "Im Agent 2")
 
     async def accept_message(self, agent, message):
-        log.info("Inbox")
+        print("--------Agent 2 receiving messages-----------")
+        log.info("Inbox of agent 2")
         log.info(agent)
         log.info(message)
+        print("--------Agent 2 receiving messages-----------")
 
     async def stop(self, *args, **kwargs):
         log.info(f"{self.name} Stop")
@@ -33,6 +35,5 @@ class AgentTwo:
         log.info(f"Kwargs = {kwargs}")
 
         while True:
-            await self.publish("AgentOne", "Hi Agent 2")
-            await self.publish("AgentOne", "Do you know me")
+            await self.publish("AgentOne", "Hello AGENT 1")
             await asyncio.sleep(2)

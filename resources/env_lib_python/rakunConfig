@@ -9,7 +9,5 @@ agents:
   agent2:
     name: AgentTwo
     code: agent/sample_agent_two.py
-
 requiredfiles:
   - requirements.txt
-  - agent/service

@@ -21,7 +21,7 @@ class AgentWrapper:
         self.id = id
         self.publish = publish
         self._agent_ = agent
-        self._agent_.publish = publish
+        self._agent_.publish = lambda channel, message: publish(agent.__class__.__name__, channel, message)
 
     async def start_agent(self):
         try:
@@ -48,7 +48,6 @@ class AgentWrapper:
             log.error(e)
 
 
-
 class PubSub:
 
     def __init__(self, pub: Redis = None, sub: Redis = None, channel: aioredis.Channel = None) -> None:
@@ -56,13 +55,13 @@ class PubSub:
         self.pub = pub
         self.sub = sub
 
-    async def publish(self, agent, message):
+    async def publish(self, sender, agent, message):
         channel_name = agent.__name__ if type(agent) != str else agent
         log.info(f"Outgoing Message received:{datetime.datetime.now()}")
         log.info(f"Outgoing Message To Channel:{channel_name}")
         log.info(f"Outgoing Message Data:{message}")
         data = {
-            "channel": channel_name,
+            "sender": sender,
             "message": message
         }
         await self.pub.publish(f"{channel_name}:1", pickle.dumps(data))
@@ -71,12 +70,12 @@ class PubSub:
         while await self.channel.wait_message():
             msg = await self.channel.get()
             data = pickle.loads(msg)
-            sender_channel = data['channel']
+            sender_agent = data['sender']
             sender_message = data['message']
             log.info(f"Incoming Message received:{datetime.datetime.now()}")
-            log.info(f"Incoming Message Channel:{sender_channel}")
+            log.info(f"Incoming Message Channel:{sender_agent}")
             log.info(f"Incoming Message Data:{sender_message}")
-            await receiver(sender_channel, sender_message)
+            await receiver(sender_agent, sender_message)
 
 
 @click.command()

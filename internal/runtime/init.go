@@ -20,6 +20,7 @@ func (runTime *RunTime) ManageAgents() {
 
 	ch := pubsub.Channel()
 	var initAgents []string
+	var isAgentsStarted bool
 	for msg := range ch {
 		if msg.Channel == platformCtrlChName {
 			if strings.HasPrefix(msg.Payload, "INIT:") {
@@ -27,13 +28,17 @@ func (runTime *RunTime) ManageAgents() {
 				if !contains(initAgents, agentName) {
 					initAgents = append(initAgents, agentName)
 				}
-				if len(runTime.Environment.Config.Agents) == len(initAgents) {
+				if len(runTime.Environment.Config.Agents) == len(initAgents) && !isAgentsStarted {
 					for name, _ := range runTime.Environment.Config.Agents {
+						log.Println("Agent start ", name)
 						runTime.Environment.CommServerClient.Publish(runTime.Context, platformChName, fmt.Sprintf("%s:START", name))
 					}
+					isAgentsStarted = true
 				}
 			} else if strings.HasPrefix(msg.Payload, "FAILED:") {
 				agentName := strings.Replace(msg.Payload, "INIT:", "", 1)
+
+				log.Println("FAILED AGENT ", agentName)
 				runTime.Environment.CommServerClient.Publish(runTime.Context, platformChName, fmt.Sprintf("%s:START", agentName))
 			}
 		}

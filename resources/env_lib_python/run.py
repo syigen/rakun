@@ -14,7 +14,7 @@ from rlog import RedisHandler
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 log = logging.getLogger("RAKUN-MAS")
 
-DEBUG = True
+DEBUG = False
 
 
 class AgentWrapper:
@@ -26,28 +26,24 @@ class AgentWrapper:
         self._agent_.publish = publish
 
     async def start_agent(self):
-        await self._agent_.start()
         try:
             await self._agent_.start()
         except Exception as e:
             log.error(e)
 
     async def stop_agent(self):
-        await self._agent_.stop()
         try:
             await self._agent_.stop()
         except Exception as e:
             log.error(e)
 
     async def execute_agent(self):
-        await self._agent_.execute()
         try:
             await self._agent_.execute()
         except Exception as e:
             log.error(e)
 
     async def accept_message(self, channel, message):
-        await self._agent_.accept_message(agent=channel, message=message)
         try:
             await self._agent_.accept_message(agent=channel, message=message)
         except Exception as e:
@@ -71,16 +67,17 @@ class PubSub:
             "channel": self.channel.name.decode("utf8"),
             "message": message
         }
-        while True:
-            re_val = await self.pub.publish(f"{channel_name}", pickle.dumps(data))
-            log.info(re_val)
-            if re_val:
-                break
+        await self.pub.publish(f"{channel_name}", pickle.dumps(data))
+        # while True:
+        #     re_val = await self.pub.publish(f"{channel_name}", pickle.dumps(data))
+        #     if re_val:
+        #         break
 
     async def subscribe(self, receiver):
         while await self.channel.wait_message():
             msg = await self.channel.get()
             data = pickle.loads(msg)
+            sender_channel = data['channel']
             sender_channel = data['channel']
             sender_message = data['message']
             if DEBUG:

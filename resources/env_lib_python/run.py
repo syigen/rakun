@@ -14,7 +14,7 @@ from rlog import RedisHandler
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 log = logging.getLogger("RAKUN-MAS")
 
-DEBUG = False
+DEBUG = True
 
 
 class AgentWrapper:
@@ -27,15 +27,31 @@ class AgentWrapper:
 
     async def start_agent(self):
         await self._agent_.start()
+        try:
+            await self._agent_.start()
+        except Exception as e:
+            log.error(e)
 
     async def stop_agent(self):
         await self._agent_.stop()
+        try:
+            await self._agent_.stop()
+        except Exception as e:
+            log.error(e)
 
     async def execute_agent(self):
         await self._agent_.execute()
+        try:
+            await self._agent_.execute()
+        except Exception as e:
+            log.error(e)
 
     async def accept_message(self, channel, message):
         await self._agent_.accept_message(agent=channel, message=message)
+        try:
+            await self._agent_.accept_message(agent=channel, message=message)
+        except Exception as e:
+            log.error(e)
 
 
 class PubSub:
@@ -52,11 +68,14 @@ class PubSub:
             log.info(f"Outgoing Message To Channel:{channel_name}")
             log.info(f"Outgoing Message Data:{message}")
         data = {
-            "channel": channel_name,
+            "channel": self.channel.name.decode("utf8"),
             "message": message
         }
-        while not await self.pub.publish(f"{channel_name}:1", pickle.dumps(data)):
-            pass
+        while True:
+            re_val = await self.pub.publish(f"{channel_name}", pickle.dumps(data))
+            log.info(re_val)
+            if re_val:
+                break
 
     async def subscribe(self, receiver):
         while await self.channel.wait_message():
@@ -66,7 +85,7 @@ class PubSub:
             sender_message = data['message']
             if DEBUG:
                 log.info(f"Incoming Message received:{datetime.datetime.now()}")
-                log.info(f"Incoming Message Channel:{sender_channel}")
+                log.info(f"Incoming Message Sender:{sender_channel},Reciver :{self.channel.name}")
                 log.info(f"Incoming Message Data:{sender_message}")
             await receiver(sender_channel, sender_message)
 
@@ -79,8 +98,14 @@ class PubSub:
 @click.option('--source', help='Agent Source')
 @click.option("--init-params", multiple=True, default=[("name", "agent_init")], type=click.Tuple([str, str]))
 def run(stack_name, comm_url, id, name, source, init_params):
+    PLATFORM_CH_NAME = f"{stack_name}_PLATFORM"
+    PLATFORM_CTRL_CH_NAME = f"{stack_name}_PLATFORM_CTRL"
+
+    START_COMMAND = f"{id}:START"
+
     log.addHandler(
-        RedisHandler(channel=f'{stack_name}_logger', host=comm_url.split(":")[0], port=int(comm_url.split(":")[1])))
+        RedisHandler(channel=f'{stack_name}_PLATFORM_LOG', host=comm_url.split(":")[0],
+                     port=int(comm_url.split(":")[1])))
     log.info("Initiate")
 
     log.info(f"Agent Stack Name {stack_name}")
@@ -96,11 +121,13 @@ def run(stack_name, comm_url, id, name, source, init_params):
     channel_name = agent_class.__name__
 
     async def start_app():
-        pub = await aioredis.create_redis(
-            f'redis://{comm_url}')
-        sub = await aioredis.create_redis(
-            f'redis://{comm_url}')
-        res = await sub.subscribe(f'{channel_name}:1')
+        pub = await aioredis.create_redis(f'redis://{comm_url}')
+        sub = await aioredis.create_redis(f'redis://{comm_url}')
+        sub_agent = await aioredis.create_redis(f'redis://{comm_url}')
+        platform_ch_res = await sub.subscribe(PLATFORM_CH_NAME)
+        platform_ch: aioredis.Channel = platform_ch_res[0]
+
+        res = await sub_agent.subscribe(f'{channel_name}')
         ch1: aioredis.Channel = res[0]
 
         pub_sub = PubSub(pub=pub, sub=sub, channel=ch1)
@@ -108,14 +135,22 @@ def run(stack_name, comm_url, id, name, source, init_params):
         agent = AgentWrapper(id=id, agent=agent_obj,
                              publish=pub_sub.publish)
 
-        await agent.start_agent()
+        async def start_agent():
+            await agent.start_agent()
+            tasks = [pub_sub.subscribe(agent.accept_message), agent.execute_agent()]
+            tsk = asyncio.wait(tasks, return_when=asyncio.ALL_COMPLETED)
+            await tsk
+            await agent.stop_agent()
 
-        # tsk = asyncio.ensure_future(pub_sub.subscribe(agent.accept_message))
-        # tsk_execute = asyncio.ensure_future(pub_sub.subscribe(agent.accept_message))
-        tasks = [pub_sub.subscribe(agent.accept_message), agent.execute_agent()]
-        tsk = asyncio.wait(tasks, return_when=asyncio.ALL_COMPLETED)
-        await tsk
-        await agent.stop_agent()
+        await pub.publish(PLATFORM_CTRL_CH_NAME, f"INIT:{id}")
+        # Platform handling commands
+        while await platform_ch.wait_message():
+            msg = await platform_ch.get(encoding="utf8")
+            msg = str(msg)
+            if str(msg) == START_COMMAND:
+                agent_start_task = asyncio.wait([start_agent()], return_when=asyncio.ALL_COMPLETED)
+                await agent_start_task
+                await pub.publish(PLATFORM_CTRL_CH_NAME, f"FAILED:{id}")
         sub.close()
         pub.close()
 

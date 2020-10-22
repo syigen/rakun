@@ -6,6 +6,6 @@ import (
 )
 
 func main() {
-	log.Print("Application begin to start")
+	log.Printf("Application - %s begin to start", VERSION)
 	cmd.Execute()
 }

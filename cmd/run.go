@@ -45,8 +45,10 @@ to quickly create a Cobra application.`,
 
 		conf.InitRunConfig()
 		env.SetupCommServerClient()
+		run.Init()
 		run.Start()
-		run.Watch()
+		run.ManageAgents()
+		//run.Watch()
 	},
 }
 

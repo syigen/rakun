@@ -13,7 +13,7 @@ func RunCommand(command string, args ...string) {
 		commandStr = commandStr + " " + arg
 	}
 
-	log.Println(fmt.Sprintf("%s %s\n", command, commandStr))
+	log.Println(fmt.Sprintf("Executing command %s %s\n", command, commandStr))
 	cmdOptions := cmd.Options{
 		Buffered:  false,
 		Streaming: true,

@@ -11,6 +11,8 @@ from aioredis import Redis
 import logging
 from rlog import RedisHandler
 
+import pymongo
+
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 log = logging.getLogger("RAKUN-MAS")
 
@@ -19,11 +21,16 @@ DEBUG = False
 
 class AgentWrapper:
 
-    def __init__(self, id, agent, publish):
+    def __init__(self, id, agent, publish, db, exit):
         self.id = id
         self.publish = publish
+        self.exit = exit
+
+        self.storage = db
         self._agent_ = agent
-        self._agent_.publish = publish
+        self._agent_.storage = self.storage
+        self._agent_.exit = self.exit
+        self._agent_.publish = self.publish
 
     async def start_agent(self):
         try:
@@ -118,6 +125,10 @@ def run(stack_name, comm_url, id, name, source, init_params):
     channel_name = agent_class.__name__
 
     async def start_app():
+        client = pymongo.MongoClient('127.0.0.1', 27017)
+        db = client.forex_ma_storage
+        for c in db.list_collection_names():
+            db[c].drop()
         pub = await aioredis.create_redis(f'redis://{comm_url}')
         sub = await aioredis.create_redis(f'redis://{comm_url}')
         sub_agent = await aioredis.create_redis(f'redis://{comm_url}')
@@ -127,10 +138,13 @@ def run(stack_name, comm_url, id, name, source, init_params):
         res = await sub_agent.subscribe(f'{channel_name}')
         ch1: aioredis.Channel = res[0]
 
+        async def exit():
+            await pub.publish(PLATFORM_CTRL_CH_NAME, f"EXIT")
+
         pub_sub = PubSub(pub=pub, sub=sub, channel=ch1)
 
         agent = AgentWrapper(id=id, agent=agent_obj,
-                             publish=pub_sub.publish)
+                             publish=pub_sub.publish, db=db, exit=exit)
 
         async def start_agent():
             await agent.start_agent()

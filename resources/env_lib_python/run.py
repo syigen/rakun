@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import json
 import os
 import pickle
 
@@ -21,7 +22,14 @@ DEBUG = False
 
 class AgentWrapper:
 
-    def __init__(self, id, agent, publish, db, exit):
+    async def display(self, msg):
+        try:
+            await self.display_pub(self._agent_, msg)
+        except Exception as e:
+            log.exception(e)
+
+    def __init__(self, id, agent, publish, db, exit, display_pub):
+        self.display_pub = display_pub
         self.id = id
         self.publish = publish
         self.exit = exit
@@ -31,6 +39,7 @@ class AgentWrapper:
         self._agent_.storage = self.storage
         self._agent_.exit = self.exit
         self._agent_.publish = self.publish
+        self._agent_.display = self.display
 
     async def start_agent(self):
         try:
@@ -60,10 +69,21 @@ class AgentWrapper:
 
 class PubSub:
 
-    def __init__(self, pub: Redis = None, sub: Redis = None, channel: aioredis.Channel = None) -> None:
+    def __init__(self, pub: Redis = None, sub: Redis = None, channel: aioredis.Channel = None,
+                 display_publisher=None, display_channel_name=None) -> None:
+        self.display_channel_name = display_channel_name
         self.channel = channel
+        self.display_publisher = display_publisher
         self.pub = pub
         self.sub = sub
+
+    async def display(self, agent, message):
+        agent = agent.__class__.__name__ if type(agent) != str else agent
+        data = {
+            "agent": agent,
+            "message": message
+        }
+        await self.display_publisher.publish(f"{self.display_channel_name}", json.dumps(data))
 
     async def publish(self, agent, message):
         channel_name = agent.__name__ if type(agent) != str else agent
@@ -76,16 +96,11 @@ class PubSub:
             "message": message
         }
         await self.pub.publish(f"{channel_name}", pickle.dumps(data))
-        # while True:
-        #     re_val = await self.pub.publish(f"{channel_name}", pickle.dumps(data))
-        #     if re_val:
-        #         break
 
     async def subscribe(self, receiver):
         while await self.channel.wait_message():
             msg = await self.channel.get()
             data = pickle.loads(msg)
-            sender_channel = data['channel']
             sender_channel = data['channel']
             sender_message = data['message']
             if DEBUG:
@@ -104,6 +119,7 @@ class PubSub:
 @click.option("--init-params", multiple=True, default=[("name", "agent_init")], type=click.Tuple([str, str]))
 def run(stack_name, comm_url, id, name, source, init_params):
     PLATFORM_CH_NAME = f"{stack_name}_PLATFORM"
+    PLATFORM_DISPLAY_CH_NAME = f"{stack_name}_PLATFORM_DISPLAY"
     PLATFORM_CTRL_CH_NAME = f"{stack_name}_PLATFORM_CTRL"
 
     START_COMMAND = f"{id}:START"
@@ -134,6 +150,8 @@ def run(stack_name, comm_url, id, name, source, init_params):
         pub = await aioredis.create_redis(f'redis://{comm_url}')
         sub = await aioredis.create_redis(f'redis://{comm_url}')
         sub_agent = await aioredis.create_redis(f'redis://{comm_url}')
+        display_pub_agent = await aioredis.create_redis(f'redis://{comm_url}')
+        #
         platform_ch_res = await sub.subscribe(PLATFORM_CH_NAME)
         platform_ch: aioredis.Channel = platform_ch_res[0]
 
@@ -143,10 +161,11 @@ def run(stack_name, comm_url, id, name, source, init_params):
         async def exit():
             await pub.publish(PLATFORM_CTRL_CH_NAME, f"EXIT:{id}")
 
-        pub_sub = PubSub(pub=pub, sub=sub, channel=ch1)
+        pub_sub = PubSub(pub=pub, sub=sub, channel=ch1, display_publisher=display_pub_agent,
+                         display_channel_name=PLATFORM_DISPLAY_CH_NAME)
 
         agent = AgentWrapper(id=id, agent=agent_obj,
-                             publish=pub_sub.publish, db=db, exit=exit)
+                             publish=pub_sub.publish, db=db, exit=exit, display_pub=pub_sub.display)
 
         async def accept_platform_command():
             while await platform_ch.wait_message():

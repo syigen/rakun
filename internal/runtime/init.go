@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sort"
 	"strings"
 )
 
@@ -37,9 +38,23 @@ func (runTime *RunTime) ManageAgents() {
 				}
 			} else if strings.HasPrefix(msg.Payload, "FAILED:") {
 				agentName := strings.Replace(msg.Payload, "INIT:", "", 1)
-
 				log.Println("FAILED AGENT ", agentName)
 				runTime.Environment.CommServerClient.Publish(runTime.Context, platformChName, fmt.Sprintf("%s:START", agentName))
+			} else if strings.HasPrefix(msg.Payload, "EXIT:") {
+				agentName := strings.Replace(msg.Payload, "INIT:", "", 1)
+				log.Println("PLATFORM EXIT REQUEST AGENT ", agentName)
+				exitCommands := []string{}
+
+				for name, _ := range runTime.Environment.Config.Agents {
+					exitCommands = append(exitCommands, fmt.Sprintf("%s:EXIT", name))
+				}
+				sort.SliceStable(exitCommands, func(i, j int) bool {
+					return true
+				})
+				for _, cmd := range exitCommands {
+					//log.Println("Agent exit ", cmd)
+					runTime.Environment.CommServerClient.Publish(runTime.Context, platformChName, cmd)
+				}
 			}
 		}
 	}

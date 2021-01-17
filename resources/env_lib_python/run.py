@@ -36,25 +36,26 @@ class AgentWrapper:
         try:
             await self._agent_.start()
         except Exception as e:
-            log.error(e)
+            log.exception(e)
 
     async def stop_agent(self):
         try:
+            log.info(f"AGENT CLOSE REQUEST {self.id}")
             await self._agent_.stop()
         except Exception as e:
-            log.error(e)
+            log.exception(e)
 
     async def execute_agent(self):
         try:
             await self._agent_.execute()
         except Exception as e:
-            log.error(e)
+            log.exception(e)
 
     async def accept_message(self, channel, message):
         try:
             await self._agent_.accept_message(agent=channel, message=message)
         except Exception as e:
-            log.error(e)
+            log.exception(e)
 
 
 class PubSub:
@@ -106,6 +107,7 @@ def run(stack_name, comm_url, id, name, source, init_params):
     PLATFORM_CTRL_CH_NAME = f"{stack_name}_PLATFORM_CTRL"
 
     START_COMMAND = f"{id}:START"
+    EXIT_COMMAND = f"{id}:EXIT"
 
     log.addHandler(
         RedisHandler(channel=f'{stack_name}_PLATFORM_LOG', host=comm_url.split(":")[0],
@@ -139,16 +141,32 @@ def run(stack_name, comm_url, id, name, source, init_params):
         ch1: aioredis.Channel = res[0]
 
         async def exit():
-            await pub.publish(PLATFORM_CTRL_CH_NAME, f"EXIT")
+            await pub.publish(PLATFORM_CTRL_CH_NAME, f"EXIT:{id}")
 
         pub_sub = PubSub(pub=pub, sub=sub, channel=ch1)
 
         agent = AgentWrapper(id=id, agent=agent_obj,
                              publish=pub_sub.publish, db=db, exit=exit)
 
+        async def accept_platform_command():
+            while await platform_ch.wait_message():
+                msg = await platform_ch.get(encoding="utf8")
+                msg = str(msg)
+                if str(msg) == EXIT_COMMAND:
+                    try:
+                        # sub.unsubscribe(channel=ch1)
+                        # sub_agent.unsubscribe(channel=platform_ch)
+                        await agent.stop_agent()
+                        # for task in asyncio.Task.all_tasks(loop=asyncio.get_event_loop()):
+                        #     # cancel all tasks other than this signal_handler
+                        #     if task is not asyncio.Task.current_task():
+                        #         task.cancel()
+                    except Exception as e:
+                        log.exception(e)
+
         async def start_agent():
             await agent.start_agent()
-            tasks = [pub_sub.subscribe(agent.accept_message), agent.execute_agent()]
+            tasks = [pub_sub.subscribe(agent.accept_message), agent.execute_agent(), accept_platform_command()]
             tsk = asyncio.wait(tasks, return_when=asyncio.ALL_COMPLETED)
             await tsk
             await agent.stop_agent()
@@ -158,10 +176,12 @@ def run(stack_name, comm_url, id, name, source, init_params):
         while await platform_ch.wait_message():
             msg = await platform_ch.get(encoding="utf8")
             msg = str(msg)
+            log.info(f"PLATFORM COMMAND REQUEST {msg=}")
             if str(msg) == START_COMMAND:
-                agent_start_task = asyncio.wait([start_agent()], return_when=asyncio.ALL_COMPLETED)
+                agent_start_task = asyncio.wait([start_agent()],
+                                                return_when=asyncio.ALL_COMPLETED)
                 await agent_start_task
-                await pub.publish(PLATFORM_CTRL_CH_NAME, f"FAILED:{id}")
+
         sub.close()
         pub.close()
 

@@ -1,6 +1,9 @@
 package prepare
 
-import "github.com/go-redis/redis/v8"
+import (
+	"github.com/ambelovsky/gosf"
+	"github.com/go-redis/redis/v8"
+)
 
 type Agent struct {
 	Name string
@@ -32,4 +35,8 @@ func (env *Environment) SetupCommServerClient() {
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
+}
+
+func (env *Environment) SetupDisplayServer() {
+	go gosf.Startup(map[string]interface{}{"port": 9999})
 }

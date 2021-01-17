@@ -3,6 +3,7 @@ package runtime
 import (
 	"context"
 	"fmt"
+	"github.com/ambelovsky/gosf"
 	"log"
 	"sort"
 	"strings"
@@ -12,17 +13,27 @@ func (runTime *RunTime) Init() {
 	runTime.Context = context.Background()
 }
 
+func echo(client *gosf.Client, request *gosf.Request) *gosf.Message {
+	return gosf.NewSuccessMessage(request.Message.Text)
+}
+
 func (runTime *RunTime) ManageAgents() {
 	log.Println("Manage Agents ")
 	platformChName := fmt.Sprintf("%s_PLATFORM", runTime.Environment.Config.Name)
+	platformDisplayChName := fmt.Sprintf("%s_PLATFORM_DISPLAY", runTime.Environment.Config.Name)
 	platformCtrlChName := fmt.Sprintf("%s_PLATFORM_CTRL", runTime.Environment.Config.Name)
 	platformLogChName := fmt.Sprintf("%s_PLATFORM_LOG", runTime.Environment.Config.Name)
-	pubsub := runTime.Environment.CommServerClient.Subscribe(runTime.Context, platformChName, platformCtrlChName, platformLogChName)
+	pubsub := runTime.Environment.CommServerClient.Subscribe(runTime.Context, platformChName, platformCtrlChName, platformLogChName, platformDisplayChName)
 
 	ch := pubsub.Channel()
 	var initAgents []string
 	var isAgentsStarted bool
 	for msg := range ch {
+		//log.Println("TEST TEST",msg.Channel, msg.Payload)
+		if msg.Channel == platformDisplayChName {
+			gosf.Broadcast("", "display_message", gosf.NewSuccessMessage(msg.Payload))
+		}
+
 		if msg.Channel == platformCtrlChName {
 			if strings.HasPrefix(msg.Payload, "INIT:") {
 				agentName := strings.Replace(msg.Payload, "INIT:", "", 1)
@@ -58,6 +69,7 @@ func (runTime *RunTime) ManageAgents() {
 			}
 		}
 	}
+
 }
 
 func contains(arr []string, str string) bool {

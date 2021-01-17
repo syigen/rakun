@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/ambelovsky/gosf"
 	"log"
@@ -31,7 +32,17 @@ func (runTime *RunTime) ManageAgents() {
 	for msg := range ch {
 		//log.Println("TEST TEST",msg.Channel, msg.Payload)
 		if msg.Channel == platformDisplayChName {
-			gosf.Broadcast("", "display_message", gosf.NewSuccessMessage(msg.Payload))
+			message := new(gosf.Message)
+			message.Success = true
+			jsonMap := make(map[string]interface{})
+
+			err := json.Unmarshal([]byte(msg.Payload), &jsonMap)
+			if err != nil {
+				log.Println(err)
+			}
+			message.Body = jsonMap
+
+			gosf.Broadcast("", "display_message", message)
 		}
 
 		if msg.Channel == platformCtrlChName {

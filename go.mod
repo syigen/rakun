@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/ambelovsky/go-structs v1.1.0 // indirect
 	github.com/ambelovsky/gosf v0.0.0-20201109201340-237aea4d6109
-	github.com/ambelovsky/gosf-socketio v0.0.0-20201109193639-add9d32f8b19 // indirect
+	github.com/ambelovsky/gosf-socketio v0.0.0-20201109193639-add9d32f8b19
 	github.com/go-cmd/cmd v1.2.1
 	github.com/go-redis/redis/v8 v8.3.0
 	github.com/gobuffalo/here v0.6.2 // indirect

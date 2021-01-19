@@ -32,17 +32,15 @@ func (runTime *RunTime) ManageAgents() {
 	for msg := range ch {
 		//log.Println("TEST TEST",msg.Channel, msg.Payload)
 		if msg.Channel == platformDisplayChName {
-			message := new(gosf.Message)
-			message.Success = true
 			jsonMap := make(map[string]interface{})
 
 			err := json.Unmarshal([]byte(msg.Payload), &jsonMap)
 			if err != nil {
 				log.Println(err)
 			}
-			message.Body = jsonMap
-
-			gosf.Broadcast("", "display_message", message)
+			endPoint := fmt.Sprint(jsonMap["agent"])
+			log.Println(jsonMap)
+			runTime.Environment.DisplayServer.BroadcastToAll(endPoint, gosf.NewSuccessMessage("Done", jsonMap))
 		}
 
 		if msg.Channel == platformCtrlChName {

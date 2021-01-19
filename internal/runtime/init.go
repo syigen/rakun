@@ -39,7 +39,6 @@ func (runTime *RunTime) ManageAgents() {
 				log.Println(err)
 			}
 			endPoint := fmt.Sprint(jsonMap["agent"])
-			log.Println(jsonMap)
 			runTime.Environment.DisplayServer.BroadcastToAll(endPoint, gosf.NewSuccessMessage(endPoint, jsonMap))
 		}
 

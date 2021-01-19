@@ -40,7 +40,7 @@ func (runTime *RunTime) ManageAgents() {
 			}
 			endPoint := fmt.Sprint(jsonMap["agent"])
 			log.Println(jsonMap)
-			runTime.Environment.DisplayServer.BroadcastToAll(endPoint, gosf.NewSuccessMessage("Done", jsonMap))
+			runTime.Environment.DisplayServer.BroadcastToAll(endPoint, gosf.NewSuccessMessage(endPoint, jsonMap))
 		}
 
 		if msg.Channel == platformCtrlChName {

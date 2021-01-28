@@ -144,9 +144,10 @@ def run(stack_name, comm_url, id, name, source, init_params):
 
     async def start_app():
         client = pymongo.MongoClient('127.0.0.1', 27017)
-        db = client.forex_ma_storage
-        for c in db.list_collection_names():
-            db[c].drop()
+        db = client[stack_name.lower()]
+        log.info(f"DB Name {db}")
+        # for c in db.list_collection_names():
+        #     db[c].drop()
         pub = await aioredis.create_redis(f'redis://{comm_url}')
         sub = await aioredis.create_redis(f'redis://{comm_url}')
         sub_agent = await aioredis.create_redis(f'redis://{comm_url}')

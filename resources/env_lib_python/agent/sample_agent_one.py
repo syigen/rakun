@@ -1,40 +1,34 @@
 import asyncio
 
 import logging
+from agent import Agent
 
-log = logging.getLogger("AGENT_ONE")
+log = logging.getLogger(Agent.Agent_One)
+
+
+def print(*args, **kwargs):
+    log.info(f"{args=}")
 
 
 class AgentOne:
-    name = "Agent Sample"
-    publish = None  # No need to define it will automatically assign at runtime self.publish(AGENT_NAME_OR_CLASS,<MESSAGE_OBJECT>)
+    publish = None
+    display = None
 
     def __init__(self, *args, **kwargs):
-        log.info(f"{self.name} Start")
-        log.info(f"Args = {args}")
-        log.info(f"Kwargs = {kwargs}")
+        log.info(f"{self} Start")
 
     async def start(self):
-        await self.publish("AgentTwo", "Hi Agent 2")
-        await self.publish("AgentTwo", "Im Agent 1")
+        # await self.publish("AgentTwo", "Hi Agent 2")
+        pass
 
     async def accept_message(self, agent, message):
-        print("--------Agent 1 receiving messages-----------")
-        log.info("Inbox of agent 1")
-        log.info(agent)
-        log.info(message)
-        print("--------Agent 1 receiving messages-----------")
+        pass
 
     async def stop(self, *args, **kwargs):
-        log.info(f"{self.name} Stop")
-        log.info(f"Args = {args}")
-        log.info(f"Kwargs = {kwargs}")
+        pass
 
     async def execute(self, *args, **kwargs):
-        log.info(f"{self.name} Execute")
-        log.info(f"Args = {args}")
-        log.info(f"Kwargs = {kwargs}")
-
         while True:
-            await self.publish("AgentTwo", "Hello AGENT 2")
+            print("run")
+            # await self.publish("AgentTwo", "Hello AGENT 2")
             await asyncio.sleep(2)

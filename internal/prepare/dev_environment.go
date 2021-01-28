@@ -13,6 +13,11 @@ func (env *Environment) BuildDevEnvironment() {
 	var err error
 	log.Println("Start Build Dev Environment")
 	env.EnvPath = env.Config.WorkDir // Set Env Path
+
+	err = utils.PkgFile("/resources/env_lib_python/agent/__init__.py", filepath.Join(env.EnvPath, "agent/__init__.py"))
+	if err != nil {
+		log.Fatalln(err)
+	}
 	// Create Sample Agent
 	log.Println("Number of agents", len(env.Config.Agents))
 	for _, agent := range env.Config.Agents {

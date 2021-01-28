@@ -23,6 +23,7 @@ type Config struct {
 	WorkDir          string
 	CommunicationUrl string
 	RequiredFiles    []string `yaml:",flow"`
+	DisplayServerUrl string
 }
 
 type Environment struct {
@@ -65,6 +66,7 @@ func (env *Environment) SetupDisplayServer() {
 
 	serveMux := http.NewServeMux()
 	serveMux.Handle("/socket.io/", server)
-	log.Panic(http.ListenAndServe("0.0.0.0:9999", serveMux))
+	error := http.ListenAndServe(env.Config.DisplayServerUrl, serveMux)
+	log.Panic(error)
 
 }

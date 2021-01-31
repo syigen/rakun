@@ -64,10 +64,11 @@ class AgentWrapper:
                 log.exception(e)
 
     async def accept_message(self, channel, message):
-        try:
-            await self._agent_.accept_message(agent=channel, message=message)
-        except Exception as e:
-            log.exception(e)
+        if hasattr(self._agent_, "accept_message"):
+            try:
+                await self._agent_.accept_message(agent=channel, message=message)
+            except Exception as e:
+                log.exception(e)
 
 
 class PubSub:

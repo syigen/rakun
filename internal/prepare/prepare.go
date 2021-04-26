@@ -36,3 +36,8 @@ type Environment struct {
 	CommServerClient *redis.Client
 	DisplayServer    *gosocketio.Server
 }
+
+const (
+	OsWindows = 1
+	OsLinux   = 2
+)

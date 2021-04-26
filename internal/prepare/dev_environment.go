@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 )
 
 func (env *Environment) BuildDevEnvironment() {
@@ -95,4 +96,19 @@ func (env *Environment) SetupDisplayServer() {
 	error := http.ListenAndServe(env.Config.DisplayServerUrl, serveMux)
 	log.Panic(error)
 
+}
+
+func (env *Environment) GetOsType() int {
+	os := runtime.GOOS
+	switch os {
+	case "windows":
+		return OsWindows
+	case "darwin":
+		fmt.Println("MAC operating system")
+	case "linux":
+		return OsLinux
+	default:
+		fmt.Printf("%s.\n", os)
+	}
+	return 0
 }

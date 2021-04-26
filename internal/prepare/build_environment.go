@@ -12,6 +12,13 @@ import (
 func (env *Environment) BuildRunEnvironment() {
 	var err error
 	log.Println("\nStart Build Environment")
+	var pythonCommand string
+	if OsLinux == env.GetOsType() {
+		pythonCommand = "venv/bin/pip"
+	} else {
+		pythonCommand = "venv/Scripts/pip.exe"
+	}
+
 	env.EnvPath = fmt.Sprintf("%s/_rakun_env", env.Config.WorkDir) // Set Env Path
 	// 1. Create Work Environment
 	utils.CreateDir(env.EnvPath, false)
@@ -60,7 +67,7 @@ func (env *Environment) BuildRunEnvironment() {
 	log.Println(string(stdout))
 
 	exe_support.RunCommand(
-		fmt.Sprintf("%s/venv/Scripts/pip.exe", env.EnvPath),
+		fmt.Sprintf("%s/%s", env.EnvPath, pythonCommand),
 		"install", "-r",
 		fmt.Sprintf("%s/requirements.txt", env.EnvPath))
 

@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"fmt"
+	"github.com/dewmal/rakun/internal/prepare"
 	"github.com/dewmal/rakun/internal/utils/exe_support"
 	"log"
 	"path/filepath"
@@ -9,10 +10,10 @@ import (
 
 func (runTime *RunTime) Start() {
 	var pythonCommand string
-	if OS_LINUX == runTime.getOsType() {
-		pythonCommand = ""
-	} else {
+	if prepare.OsLinux == runTime.Environment.GetOsType() {
 		pythonCommand = "venv/bin/python"
+	} else {
+		pythonCommand = "venv/Scripts/python.exe"
 	}
 
 	exe_support.RunCommand(runTime.buildRuntimeFilePath(pythonCommand), "--version")

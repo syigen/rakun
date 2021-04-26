@@ -8,7 +8,14 @@ import (
 )
 
 func (runTime *RunTime) Start() {
-	exe_support.RunCommand(runTime.buildRuntimeFilePath("venv/Scripts/python.exe"), "--version")
+	var pythonCommand string
+	if OS_LINUX == runTime.getOsType() {
+		pythonCommand = ""
+	} else {
+		pythonCommand = "venv/bin/python"
+	}
+
+	exe_support.RunCommand(runTime.buildRuntimeFilePath(pythonCommand), "--version")
 	config := runTime.Environment.Config
 	agents := config.Agents
 	for name, agent := range agents {
@@ -21,7 +28,7 @@ func (runTime *RunTime) Start() {
 			"--name", agent.Name,
 			"--source", filepath.ToSlash(agent.Code),
 		}
-		go exe_support.RunCommand(runTime.buildRuntimeFilePath("venv/Scripts/python.exe"), commandArgs...)
+		go exe_support.RunCommand(runTime.buildRuntimeFilePath(pythonCommand), commandArgs...)
 	}
 }
 

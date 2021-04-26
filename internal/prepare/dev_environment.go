@@ -90,6 +90,8 @@ func (env *Environment) SetupDisplayServer() {
 
 	serveMux := http.NewServeMux()
 	serveMux.Handle("/socket.io/", server)
+
+	log.Println("Display server started ", env.Config.DisplayServerUrl)
 	error := http.ListenAndServe(env.Config.DisplayServerUrl, serveMux)
 	log.Panic(error)
 

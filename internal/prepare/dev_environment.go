@@ -18,6 +18,13 @@ import (
 func (env *Environment) BuildDevEnvironment() {
 	var err error
 	log.Println("Start Build Dev Environment")
+	var pythonCommand string
+	if OsLinux == env.GetOsType() {
+		pythonCommand = "venv/bin/pip"
+	} else {
+		pythonCommand = "venv/Scripts/pip.exe"
+	}
+
 	env.EnvPath = env.Config.WorkDir // Set Env Path
 
 	err = utils.PkgFile("/resources/env_lib_python/agent/__init__.py", filepath.Join(env.EnvPath, "agent/__init__.py"))
@@ -52,7 +59,7 @@ func (env *Environment) BuildDevEnvironment() {
 	log.Println(string(stdout))
 
 	exe_support.RunCommand(
-		fmt.Sprintf("%s/venv/Scripts/pip.exe", env.EnvPath),
+		fmt.Sprintf("%s/%s", env.EnvPath, pythonCommand),
 		"install", "-r",
 		fmt.Sprintf("%s/dev-requirements.txt", env.EnvPath))
 

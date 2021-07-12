@@ -11,7 +11,15 @@ Also rakun agents come with the ability to work as distributed agents, this also
 there are few agents not working. 
 Our main goal is to provide a powerful solution to Multi-Agent System developers to build their systems. 
 
-**Product features:**
-- Develop Multi Agent systems using web based Graphical user interface
-- Deploy and monitor agent system using web based dashboard
-- Allow developers to deploy agent system based on pay as go method
+## Features
+
+- [x] Distributed Agents 
+- [x] Async message passing and handling
+- [x] Fault Tolerance
+- [x] Cross platform
+- [x] Live monitoring
+- [x] Websocket enabled
+- [ ] Drag and drop agent development
+- [ ] Web dashboard
+- [ ] Allow developers to deploy agent system based on pay as go method
+

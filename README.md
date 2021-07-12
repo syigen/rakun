@@ -1,19 +1,19 @@
 
 # RAKUN
 
-This ia a multi agent platform which allow to work at realtime
-
+A Multi Agent system is a computer based intelligence agent based system which allows developers to solve complex problems which cannot be solved by monolithic systems. However development of these systems are not easy because of message passing and agent lifecycle management. Rakun is a distributed platform which enables developers to develop MAS without considering message passing and agent lifecycle management. It can be used with any existing solution without worrying about dependencies. 
 
 
 ## Features
 
-- Distributed Agents
-- Async message passing and handling
-- Fault Tolerance
-- Cross platform
-- Live monitoring
-- Websocket enabled
-
+- [x] Distributed Agents 
+- [x] Async message passing and handling
+- [x] Fault Tolerance
+- [x] Cross platform
+- [x] Live monitoring
+- [x] Websocket enabled
+- [ ] Drag and drop agent development
+- [ ] Web dashboard
 
   
 ## Installation 
@@ -77,7 +77,7 @@ class AgentFirst:
 
 
 ```
-
+rakun config file
 ```yaml
 name: SimpleExample
 version: 1.0.0

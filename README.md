@@ -1,7 +1,7 @@
 
 # RAKUN
 
-A Multi Agent system is a computer based intelligence agent based system which allows developers to solve complex problems which cannot be solved by monolithic systems. However development of these systems are not easy because of message passing and agent lifecycle management. Rakun is a distributed platform which enables developers to develop MAS without considering message passing and agent lifecycle management. It can be used with any existing solution without worrying about dependencies. 
+A Multi Agent system (MAS) is an intelligent agent based system which allows to solve complex problems which cannot be solved by monolithic systems. Developing these systems correctly is not an easy task. Rakun is a distributed platform which enables developers to develop MAS without worrying about the complexity of the developing MAS each time. It can be used with any existing solution without worrying about dependencies. 
 
 
 ## Features
